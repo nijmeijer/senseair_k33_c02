@@ -71,13 +71,12 @@ static int SENSEAIR_K33_regmap_read(void *context, const void *reg_buf,
 
 
         // Send Request command
-        buf[0]=SENSEAIR_K33_READ_RAM_COMMAND | (val_size & 0x0F);                 // Read RAM command + requested number of bytes
-        buf[1]=0;                    // ram_address high
-        buf[2]= ((u8 *)reg_buf)[0];  // ram_address low
+        buf[0]=SENSEAIR_K33_READ_RAM_COMMAND | (val_size & 0x0F);  // Read RAM command + requested number of bytes
+        buf[1]=0;                                                  // ram_address high
+        buf[2]= ((u8 *)reg_buf)[0];                                // ram_address low
         sum = 0;
         count = 0;
         while (count<3) {
-  	  //dev_err(&SENSEAIR_K33->client->dev, "regmap_request: sending %d\n", buf[count]);
           sum += buf[count] & 0xFF;
           count++;
          }
@@ -93,7 +92,6 @@ static int SENSEAIR_K33_regmap_read(void *context, const void *reg_buf,
         count = 0;
         sum = 0;
         while (count<val_size+1) {
-  	  //dev_err(&SENSEAIR_K33->client->dev, "regmap_received: %d\n", buf[count]);
           sum += buf[count] & 0xFF;
           count++;
          }
@@ -126,13 +124,6 @@ static int SENSEAIR_K33_regmap_write(void *context, const void *val_buf, size_t 
 	memset(&data, 0, sizeof(data));
 	data.block[0] = count;
 	memcpy(&data.block[1], (u8 *)val_buf + 1, count);
-
-	//dev_err(&SENSEAIR_K33->client->dev, "regmap_write: sending count %d \n", data.block[0]);
-	//dev_err(&SENSEAIR_K33->client->dev, "regmap_write: sending %d \n", data.block[1]);
-	//dev_err(&SENSEAIR_K33->client->dev, "regmap_write: sending %d \n", data.block[2]);
-	//dev_err(&SENSEAIR_K33->client->dev, "regmap_write: sending %d \n", data.block[3]);
-	//dev_err(&SENSEAIR_K33->client->dev, "regmap_write: sending %d \n", data.block[4]);
-
 
 	__i2c_smbus_xfer(client->adapter, client->addr,
 			 SENSEAIR_K33->ignore_nak ? I2C_M_IGNORE_NAK : 0,
@@ -178,12 +169,7 @@ static int SENSEAIR_K33_read_word(struct SENSEAIR_K33_dev *SENSEAIR_K33, u8 reg,
 
 	i2c_lock_bus(client->adapter, I2C_LOCK_SEGMENT);
 
-	//dev_err(&SENSEAIR_K33->client->dev, "calling bulk_read: reg %d \n", reg);
-
 	ret = regmap_bulk_read(SENSEAIR_K33->regmap, reg, &be_val, sizeof(be_val));
-
-	//dev_err(&SENSEAIR_K33->client->dev, "called bulk_read: be_val %d    size %d\n", be_val, sizeof(be_val));
-
 
 	i2c_unlock_bus(client->adapter, I2C_LOCK_SEGMENT);
 	if (ret) {
@@ -268,7 +254,6 @@ static ssize_t SENSEAIR_K33_error_status_read(struct iio_dev *iiodev,
 	struct SENSEAIR_K33_dev *SENSEAIR_K33 = iio_priv(iiodev);
 	unsigned long errors;
 	ssize_t len = 0;
-//	u16 value;
 	int ret;
 	u8 i;
 
@@ -395,7 +380,7 @@ static int SENSEAIR_K33_read_raw(struct iio_dev *iio_dev,
 			return IIO_VAL_FRACTIONAL;
 
 		case IIO_TEMP:
-			/* x10 to comply with IIO scale (millidegrees celsius). */
+			/* x10 to comply with IIO scale (millidegrees celsius). */ // TO BE CHECKED
 			*val = 10;
 			return IIO_VAL_INT;
 
